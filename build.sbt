@@ -19,7 +19,7 @@ val macwire = "com.softwaremill.macwire" %% "macros" % "2.2.5" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.0.1" % Test
 val scalaTestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 val mockito = "org.mockito" % "mockito-core" % "2.22.0" % Test
-
+val postgresDriver = "org.postgresql" % "postgresql" % "42.2.5"
 
 lazy val security = (project in file("security"))
   .settings(commonSettings: _*)
@@ -47,10 +47,10 @@ lazy val itemImpl = (project in file("item-impl"))
   .enablePlugins(LagomScala, SbtReactiveAppPlugin)
   .settings(
     libraryDependencies ++= Seq(
-      lagomScaladslPersistenceCassandra,
+      lagomScaladslPersistenceJdbc,
       lagomScaladslTestKit,
       lagomScaladslKafkaBroker,
-      "com.datastax.cassandra" % "cassandra-driver-extras" % "3.0.0",
+      postgresDriver,
       macwire,
       scalaTest
     )
@@ -74,9 +74,10 @@ lazy val biddingImpl = (project in file("bidding-impl"))
   .dependsOn(biddingApi, itemApi)
   .settings(
     libraryDependencies ++= Seq(
-      lagomScaladslPersistenceCassandra,
+      lagomScaladslPersistenceJdbc,
       lagomScaladslTestKit,
       lagomScaladslKafkaBroker,
+      postgresDriver,
       macwire,
       scalaTest
     ),
@@ -100,9 +101,10 @@ lazy val searchImpl = (project in file("search-impl"))
   .dependsOn(searchApi, itemApi, biddingApi)
   .settings(
     libraryDependencies ++= Seq(
-      lagomScaladslPersistenceCassandra,
+      "com.typesafe.play" %% "play-slick" % "3.0.1",
       lagomScaladslKafkaClient,
       lagomScaladslTestKit,
+      postgresDriver,
       macwire,
       scalaTest
     )
@@ -126,8 +128,9 @@ lazy val transactionImpl = (project in file("transaction-impl"))
   .dependsOn(transactionApi, biddingApi)
   .settings(
     libraryDependencies ++= Seq(
-      lagomScaladslPersistenceCassandra,
+      lagomScaladslPersistenceJdbc,
       lagomScaladslTestKit,
+      postgresDriver,
       macwire,
       scalaTest
     ),
@@ -150,7 +153,8 @@ lazy val userImpl = (project in file("user-impl"))
   .dependsOn(userApi)
   .settings(
     libraryDependencies ++= Seq(
-      lagomScaladslPersistenceCassandra,
+      lagomScaladslPersistenceJdbc,
+      postgresDriver,
       macwire,
       scalaTest
     )
@@ -159,7 +163,7 @@ lazy val userImpl = (project in file("user-impl"))
 lazy val webGateway = (project in file("web-gateway"))
   .settings(commonSettings: _*)
   .enablePlugins(PlayScala, LagomPlay, SbtReactiveAppPlugin)
-  .dependsOn(biddingApi, itemApi, userApi)
+  .dependsOn(biddingApi, itemApi, userApi, searchApi)
   .settings(
     libraryDependencies ++= Seq(
       lagomScaladslServer,
@@ -180,10 +184,4 @@ lazy val webGateway = (project in file("web-gateway"))
 def commonSettings: Seq[Setting[_]] = Seq(
 )
 
-lagomCassandraCleanOnStart in ThisBuild := false
-
-// ------------------------------------------------------------------------------------------------
-
-// register 'elastic-search' as an unmanaged service on the service locator so that at 'runAll' our code
-// will resolve 'elastic-search' and use it. See also com.example.com.ElasticSearch
-lagomUnmanagedServices in ThisBuild += ("elastic-search" -> "http://127.0.0.1:9200")
+lagomCassandraEnabled in ThisBuild := false

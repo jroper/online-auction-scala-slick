@@ -38,10 +38,10 @@ trait ItemService extends Service {
     *
     * @param id       The ID of the user.
     * @param status   The status of items to return.
-    * @param page     The next page represented as string.
+    * @param page     The page to get.
     * @return The sequence of items.
     */
-  def getItemsForUser(id: UUID, status: ItemStatus.Status, page: Option[String]): ServiceCall[NotUsed, utils.PagingState[ItemSummary]]
+  def getItemsForUser(id: UUID, status: ItemStatus.Status, page: Int): ServiceCall[NotUsed, utils.PagingState[ItemSummary]]
 
   /**
     * The item events stream.

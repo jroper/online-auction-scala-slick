@@ -5,17 +5,19 @@ import com.example.auction.bidding.api.BiddingService
 import com.example.auction.item.api.ItemService
 import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
-import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
+import com.lightbend.lagom.scaladsl.persistence.slick.SlickPersistenceComponents
 import com.lightbend.lagom.scaladsl.server._
 import com.softwaremill.macwire._
 import com.lightbend.rp.servicediscovery.lagom.scaladsl.LagomServiceLocatorComponents
 import play.api.Environment
+import play.api.db.HikariCPComponents
 import play.api.libs.ws.ahc.AhcWSComponents
 
 import scala.concurrent.ExecutionContext
 
 trait ItemComponents extends LagomServerComponents
-  with CassandraPersistenceComponents {
+  with SlickPersistenceComponents
+  with HikariCPComponents {
 
   implicit def executionContext: ExecutionContext
   def environment: Environment

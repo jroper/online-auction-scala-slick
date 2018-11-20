@@ -3,7 +3,6 @@ package com.example.auction.item.impl
 import java.util.UUID
 
 import akka.persistence.query.Offset
-import com.datastax.driver.core.utils.UUIDs
 import com.example.auction.item.api.ItemService
 import com.example.auction.item.api
 import com.example.auction.security.ServerSecurity._
@@ -19,23 +18,11 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
 
   private val DefaultPageSize = 10
 
-  /**
-    * Indicates how many resulting rows are retrieved simultaneously (the goal being to avoid loading too many results
-    * in memory for queries yielding large result sets).
-    *
-    * It can be defined taking into account the `LIMIT` value depending on the application requirements.
-    *
-    * @see https://docs.datastax.com/en/developer/java-driver/2.1/faq/#is-there-a-way-to-control-the-batch-size-of-the-results-returned-from-a-query
-    * @see https://docs.datastax.com/en/developer/java-driver/2.1/faq/#what-s-the-difference-between-using-set-fetch-size-and-limit
-    * @see https://docs.datastax.com/en/developer/java-driver/3.2/manual/paging/#setting-the-fetch-size
-    */
-  private val DefaultFetchSize = 10
-
   override def createItem = authenticated(userId => ServerServiceCall { item =>
     if (userId != item.creator) {
       throw Forbidden("User " + userId + " can't created an item on behalf of " + item.creator)
     }
-    val itemId = UUIDs.timeBased()
+    val itemId = UUID.randomUUID()
     val pItem = Item(itemId, item.creator, item.title, item.description, item.currencyId, item.increment,
       item.reservePrice, None, ItemStatus.Created, item.auctionDuration, None, None, None)
     entityRef(itemId).ask(CreateItem(pItem)).map { _ =>
@@ -54,8 +41,9 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
     }
   }
 
-  override def getItemsForUser(id: UUID, status: api.ItemStatus.Status, page: Option[String]) = ServiceCall { _ =>
-    itemRepository.getItemsForUser(id, status, page, DefaultFetchSize)
+  override def getItemsForUser(id: UUID, status: api.ItemStatus.Status, page: Int) = ServiceCall { _ =>
+    itemRepository.executeGetItemsForUser(id, ItemStatus.fromApi(status), page, DefaultPageSize)
+      .map(_.map(_.toApi))
   }
 
   override def itemEvents = TopicProducer.taggedStreamWithOffset(ItemEvent.Tag.allTags.toList) { (tag, offset) =>

@@ -5,7 +5,7 @@
 @import helper._
 
 @import java.util.Locale
-@(status: ItemStatus.Status, pagingState: utils.PagingState[ItemSummary])(implicit nav: Nav, request: RequestHeader)
+@(status: ItemStatus.Status, paginatedItems: PaginatedSequence[ItemSummary])(implicit nav: Nav, request: RequestHeader)
 
 @for(user <- nav.user) {
     @main(user.name) {
@@ -15,17 +15,17 @@
             <ul class="menu vertical large-3 columns">
             @for(menuStatus <- ItemStatus.values) {
                 <li class="@if(menuStatus == status) {active}">
-                    <a href="@routes.ProfileController.myItems(menuStatus.toString.toLowerCase(Locale.ENGLISH), None)">@Messages("items." + menuStatus)</a>
+                    <a href="@routes.ProfileController.myItems(menuStatus.toString.toLowerCase(Locale.ENGLISH))">@Messages("items." + menuStatus)</a>
                 </li>
             }
             </ul>
 
             <div class="large-9 columns">
-            @if(pagingState.isEmpty) {
+            @if(paginatedItems.isEmpty) {
                 <em>@Messages("noItems." + status)</em>
             } else {
                 <table>
-                    <caption>@Messages("items.caption", Messages("items." + status), pagingState.count)</caption>
+                    <caption>@Messages("items.caption", Messages("items." + status), paginatedItems.count)</caption>
 
                     <thead>
                         <tr>
@@ -38,7 +38,7 @@
                     </thead>
 
                     <tbody>
-                    @for(item <- pagingState.items) {
+                    @for(item <- paginatedItems.items) {
                         @defining(Currency.valueOf(item.currencyId)) { currency =>
                             <tr>
                                 <td>
@@ -61,11 +61,9 @@
                     </tbody>
                 </table>
 
-                @paginate(
-                    pagingState,
-                    routes.ProfileController.myItems(status.toString.toLowerCase(Locale.ENGLISH), Some(pagingState.nextPage)),
-                    routes.ProfileController.myItems(status.toString.toLowerCase(Locale.ENGLISH), None)
-                )
+                @paginate(paginatedItems){ (pageNumber,  label) =>
+                    <a href="@routes.ProfileController.myItems(status.toString.toLowerCase(Locale.ENGLISH), pageNumber)" aria-label="@label">@label</a>
+                }
             }
             </div>
         </div>

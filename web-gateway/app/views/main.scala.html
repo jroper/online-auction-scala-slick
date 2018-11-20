@@ -18,12 +18,13 @@
                     <li><a href="@routes.Main.index()">@Messages("lagomAuction")</a></li>
                     <li><a href="@routes.Main.createUserForm()">@Messages("createUser")</a></li>
                     <li><a href="@routes.ItemController.createItemForm()">@Messages("createItem")</a></li>
+                    <li><a href="@routes.SearchController.searchForm">@Messages("search")</a></li>
                 </ul>
             </div>
             <div class="top-bar-right">
                 <ul class="menu dropdown" data-dropdown-menu>
                     <li>
-                        <a href="@routes.ProfileController.myItems(ItemStatus.Created.toString.toLowerCase(Locale.ENGLISH), None)">
+                        <a href="@routes.ProfileController.myItems(ItemStatus.Created.toString.toLowerCase(Locale.ENGLISH))">
                             @nav.user.map(_.name).getOrElse(Messages("logInAs"))</a>
                         <ul class="menu vertical">
                         @for(user <- nav.users) {

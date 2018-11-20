@@ -8,6 +8,7 @@ import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventTag, PersistentEntity}
 import play.api.libs.json.{Format, Json}
 import com.example.auction.utils.JsonFormats._
+import com.example.auction.item.api
 
 class ItemEntity extends PersistentEntity {
   override type Command = ItemCommand
@@ -83,7 +84,20 @@ class ItemEntity extends PersistentEntity {
 object ItemStatus extends Enumeration {
   val Created, Auction, Completed, Cancelled = Value
   type Status = Value
-  
+
+  private val statusMappings = Seq(
+    api.ItemStatus.Created -> Created,
+    api.ItemStatus.Auction -> Auction,
+    api.ItemStatus.Completed -> Completed,
+    api.ItemStatus.Cancelled -> Cancelled
+  )
+
+  private val toApiMap = statusMappings.map(_.swap).toMap
+  private val fromApiMap = statusMappings.toMap
+
+  def fromApi(status: api.ItemStatus.Status): Status = fromApiMap(status)
+  def toApi(status: Status): api.ItemStatus.Status = toApiMap(status)
+
   implicit val format: Format[Status] = enumFormat(ItemStatus)
 }
 

@@ -3,7 +3,7 @@ package com.example.auction.user.impl
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
+import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext
 
 class UserServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(implicit ec: ExecutionContext, mat: Materializer) extends UserService {
 
-  private val currentIdsQuery = PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
+  private val currentIdsQuery = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
 
   override def createUser = ServiceCall { createUser =>
     val userId = UUID.randomUUID()

@@ -1,12 +1,49 @@
-@import com.example.auction.utils
-@import play.mvc.Call
+@(pagination: PaginatedSequence[_])(route: (Int, String) => Html )(implicit nav: Nav)
 
-@(pagination: utils.PagingState[_], nextPageRoute: Call, reloadRoute: Call)(implicit messages: Messages)
-
-<div class="navigation">
-    @if(pagination.isLast) {
-        <a class="" href=@reloadRoute>@messages("pagination.reload")</a>
+@paginationItem(pageNumber: Int, label: String, isLinked: Boolean, disabledClass: String, otherClasses: String = "") = {
+@defining(otherClasses + (if(!isLinked) " " + disabledClass else "")) { liClasses =>
+    <li class="@liClasses">
+    @if(isLinked) {
+        @route(pageNumber , label)
     } else {
-        <a class="" href=@nextPageRoute>@messages("pagination.loadMore")</a>
+        @label
     }
-</div>
+    </li>
+}
+}
+
+@prevPage() = @{
+    pagination.page - 1
+}
+@nextPage() = @{
+    pagination.page + 1
+}
+
+@if(pagination.isPaged) {
+    <nav>
+        <ul class="pagination" aria-label="Pagination">
+            @paginationItem(
+                prevPage(),
+                Messages("pagination.prev"),
+                isLinked = !pagination.isFirst,
+                disabledClass = "disabled",
+                otherClasses = "pagination-previous"
+            )
+            @for(pageNumber <- 0 until pagination.pageCount) {
+                @paginationItem(
+                    pageNumber,
+                    (pageNumber + 1).toString,
+                    isLinked = pageNumber != pagination.page,
+                    disabledClass = "current"
+                )
+            }
+            @paginationItem(
+                nextPage(),
+                Messages("pagination.next"),
+                isLinked = !pagination.isLast,
+                disabledClass = "disabled",
+                otherClasses = "pagination-next"
+            )
+        </ul>
+    </nav>
+}

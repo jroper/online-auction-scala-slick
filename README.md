@@ -12,23 +12,19 @@ This is a sample Scala auction site using the Lagom Framework. A [java version](
 ## Getting started
 To get started make sure you have sbt and git installed on your system. You will also need an active internet connection.
 
-### Running: Prerequisites
+### Running in development: Prerequisites
 
-- You will need to download and run an Elastisearch server:
+- You need to install PostgreSQL, running on the default port (5432).
+- Run the [`create-databases-dev.sql`](create-databases-dev.sql) script as the postgres admin user. This will create a new database per service, and corresponding users with full permissions on each database for each service to use.
+- In development, there is no need to create any tables, as Lagom and this application will manage the creation of tables for you.
 
-```
-curl -L -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.0.2.tar.gz
-tar -xvf elasticsearch-5.0.2.tar.gz
-cd elasticsearch-5.0.2/bin
-./elasticsearch
-```
 ### Running
 
-On another terminal, clone this repo and run the sample app using the command `sbt runAll`:
+Clone this repo and run the sample app using the command `sbt runAll`:
 
 ```
-git clone git@github.com:lagom/online-auction-scala.git
-cd online-auction-scala
+git clone git@github.com:lagom/online-auction-scala-slick.git
+cd online-auction-scala-slick
 sbt runAll
 ```
 

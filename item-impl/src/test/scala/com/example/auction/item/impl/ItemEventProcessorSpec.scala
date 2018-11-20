@@ -18,7 +18,7 @@ import scala.concurrent.Future
 
 class ItemEventProcessorSpec extends AsyncWordSpec with BeforeAndAfterAll with Matchers {
 
-  private val server = ServiceTest.startServer(ServiceTest.defaultSetup.withCassandra(true)) { ctx =>
+  private val server = ServiceTest.startServer(ServiceTest.defaultSetup.withJdbc()) { ctx =>
     new LagomApplication(ctx) with ItemComponents with AhcWSComponents with LagomKafkaComponents {
       override def serviceLocator = NoServiceLocator
       override lazy val readSide: ReadSideTestDriver = new ReadSideTestDriver

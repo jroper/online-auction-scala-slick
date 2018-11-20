@@ -11,7 +11,11 @@ $().ready(function () {
                     "CSRF-Token" : csrfToken
                 }
             }).then(function() {
-                window.location.reload();
+                // Force reload as a GET. If an ordinary reload was done, then for pages loaded by POST,
+                // the POST will be resubmitted containing the old CSRF token, however, this won't work,
+                // since after logging in, we would have a new session with a new CSRF token.
+                var loc = window.location;
+                window.location = loc.protocol + '//' + loc.host + loc.pathname + loc.search;
             });
         });
     });
